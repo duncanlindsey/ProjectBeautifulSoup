@@ -3,8 +3,6 @@ import requests, re
 import numpy as np
 import pandas as pd
 
-parentURL = 'http://www.cs.ucl.ac.uk/'
-targetURL = 'http://www.cs.ucl.ac.uk/current_students/syllabus/pg/'
 targetModulesFile = 'TargetModules.csv'
 
 def collectSoup(url):
@@ -12,11 +10,8 @@ def collectSoup(url):
     soup = BeautifulSoup(page.text, 'html.parser')
     return soup
 
-def parseModuleList(soup):
+def parseModuleList(soup, parentURL):
     modules = soup.find_all(title=re.compile('COMP'))
-    return modules
-
-def tabulateModules(modules):
     moduleData = []
     for module in modules:
         text = singleSplit(module.contents[0], '-')
@@ -35,15 +30,3 @@ def identifyLinks(library, targets):
 def loadCSV(filename):
     df = pd.read_csv(filename)
     return df
-
-''' FILE RUN '''
-
-soup = collectSoup(targetURL)
-modules = parseModuleList(soup)
-moduleLibrary = tabulateModules(modules)
-moduleTargets = loadCSV(targetModulesFile)
-fullTargets = identifyLinks(moduleLibrary, moduleTargets)
-print(fullTargets)
-#print(moduleLibrary)
-#for i in moduleLibrary.index:
-    #print(moduleLibrary.at[i, 'Module'])
