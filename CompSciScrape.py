@@ -40,8 +40,7 @@ def parseModuleDetails(soup):
                     body_text.append('- ' + bullet.get_text(' ', strip=True))
             elif sibling.name:
                 body_text.append(sibling.get_text(' ', strip=True))
-        module_details[header_text] = '''
-        '''.join(body_text)
+        module_details[header_text] = ' '.join(body_text)
     module_details['Reading List'] = focus_soup.find(href=re.compile('readinglists.ucl')).get('href')
     df = pd.DataFrame(module_details, index=[0])
     return df
