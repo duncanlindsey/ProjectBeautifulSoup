@@ -38,7 +38,7 @@ def parseModuleDetails(soup):
             if sibling.name == 'ul':
                 for bullet in sibling.find_all('li'):
                     body_text.append('- ' + bullet.get_text(' ', strip=True))
-            else:
+            elif sibling.name:
                 body_text.append(sibling.get_text(' ', strip=True))
         module_details[header_text] = '''
         '''.join(body_text)
