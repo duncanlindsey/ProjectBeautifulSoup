@@ -18,9 +18,9 @@ def parseModuleList(soup, parentURL):
     df = pd.DataFrame(moduleData, columns = ['Code', 'Module', 'Link'])
     return df
 
-def parseModuleDetails(soup):
+def parseModuleDetails(module, soup):
     focus_soup = soup.find(class_='syllabus_page')
-    module_details = {}
+    module_details = {'Module': module}
 
     # Scraping the table
     titles = focus_soup.find_all('th')
@@ -30,17 +30,17 @@ def parseModuleDetails(soup):
     
     # Scraping the subsequent paragraphs
     for header in focus_soup.find_all('div', class_=re.compile('csc-header ')):
-        header_text = header.get_text(strip=True)
+        header_text = header.get_text(strip=True).rstrip(' .')
         body_text = []
         for sibling in header.next_siblings:
             if sibling.name and sibling.name.startswith('h1'):
                 break
             if sibling.name == 'ul':
                 for bullet in sibling.find_all('li'):
-                    body_text.append('- ' + bullet.get_text(' ', strip=True))
+                    body_text.append('- ' + bullet.get_text(' ', strip=True).rstrip(' .'))
             elif sibling.name:
-                body_text.append(sibling.get_text(' ', strip=True))
-        module_details[header_text] = ' '.join(body_text)
+                body_text.append(sibling.get_text(' ', strip=True).rstrip(' .'))
+        module_details[header_text] = '. '.join(body_text)
     module_details['Reading List'] = focus_soup.find(href=re.compile('readinglists.ucl')).get('href')
     df = pd.DataFrame(module_details, index=[0])
     return df
@@ -49,7 +49,7 @@ def singleSplit(text, delim):
     return (text.partition(delim)[0].strip(), text.partition(delim)[2].strip())
 
 def joinDataframes(targets, library, onField):
-    joined = targets.join(library.set_index(onField), on = onField)
+    joined = targets.join(library.set_index(onField), on = onField, how = 'left', lsuffix = '_left', rsuffix = '_right')
     return joined
 
 def loadCSV(filename):
@@ -57,4 +57,4 @@ def loadCSV(filename):
     return df
 
 soup = collectSoup('http://www.cs.ucl.ac.uk/current_students/syllabus/compgi/compgi09_applied_machine_learning/')
-parseModuleDetails(soup)
+parseModuleDetails('Test Module', soup)
